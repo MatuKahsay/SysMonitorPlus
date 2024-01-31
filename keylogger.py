@@ -29,3 +29,14 @@ import psutil  # Provides an interface for retrieving information on system util
 
 # Import requests for making HTTP requests.
 import requests  # Elegant and simple HTTP library for Python, built for human beings.
+
+
+# File paths and settings
+keys_information = "key_log.txt"
+mouse_information = "mouse_log.txt"
+system_information = "system_info.txt"
+clipboard_information = "clipboard.txt"
+screenshot_information = "screenshot.png"
+file_path = "C:\\Users\\User\\PycharmProjects\\KeyLogger\\venv"
+extend = "\\"
+SEND_REPORT_EVERY = 60
