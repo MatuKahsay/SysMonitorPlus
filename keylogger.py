@@ -53,6 +53,18 @@ SEND_REPORT_EVERY = 60
 telegram_token = 'your_telegram_bot_token'  # Replace with your token
 telegram_chat_id = 'your_chat_id'  # Replace with your chat ID
 
+def send_telegram_message(message):
+    try:
+        url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
+        data = {
+            "chat_id": telegram_chat_id,
+            "text": message
+        }
+        response = requests.post(url, data=data)
+        response.raise_for_status()
+    except Exception as e:
+        print(f"Error sending Telegram message: {e}")
+
 # Global flag for thread termination
 stop_threads = False
 
