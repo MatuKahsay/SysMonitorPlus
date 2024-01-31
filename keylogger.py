@@ -43,8 +43,8 @@ mouse_information = "mouse_log.txt"
 system_information = "system_info.txt"
 clipboard_information = "clipboard.txt"
 screenshot_information = "screenshot.png"
-file_path = "C:\\Users\\User\\PycharmProjects\\KeyLogger\\venv"
-extend = "\\"
+file_path = "/Users/yourusername/PycharmProjects/KeyLogger/"
+extend = "/"
 SEND_REPORT_EVERY = 60
 
 # Telegram settings
