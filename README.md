@@ -33,9 +33,10 @@ Usage
     Configure the script settings according to your needs. This includes setting file paths, Telegram API tokens, and encryption keys.
     Run the script:
 
+    python3 keylogger.py
+
 bash
 
-python3 keylogger.py
 
 Configuration
 
